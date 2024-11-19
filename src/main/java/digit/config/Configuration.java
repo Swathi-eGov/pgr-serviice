@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
-
 import jakarta.annotation.PostConstruct;
 import java.util.TimeZone;
 
@@ -69,6 +68,12 @@ public class Configuration {
     @Value("${egov.mdms.search.endpoint}")
     private String mdmsEndPoint;
 
+    @Value("${egov.idgen.pgr.serviceRequestId.name}")
+    private String serviceRequestIdGenName;
+
+    @Value("${egov.idgen.pgr.serviceRequestId.format}")
+    private String serviceRequestIdGenFormat;
+
 
     //HRMS
     @Value("${egov.hrms.host}")
@@ -89,4 +94,29 @@ public class Configuration {
     //SMSNotification
     @Value("${egov.sms.notification.topic}")
     private String smsNotificationTopic;
+
+    // Pgr Topic
+    @Value("${pgr.kafka.create.topic}")
+    private String pgrCreateTopic;
+
+    @Value("${pgr.kafka.update.topic}")
+    private String pgrUpdateTopic;
+
+    @Value("${egov.complaints.category}")
+    private String complaintTypes;
+
+    //Allowed Search Parameters
+    @Value("${citizen.allowed.search.params}")
+    private String allowedCitizenSearchParameters;
+
+    @Value("${employee.allowed.search.params}")
+    private String allowedEmployeeSearchParameters;
+
+    @Value("${egov.dynamicdata.period}")
+    private String numberOfDays;
+
+    //Sources
+    @Value("${allowed.source}")
+    private String allowedSource;
+
 }

@@ -1,6 +1,7 @@
 package digit.web.models;
 
 import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import digit.web.models.RequestHeader;
@@ -22,24 +23,16 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ServiceRequest   {
-        @JsonProperty("requestInfo")
-
-          @Valid
-                private RequestInfo requestInfo = null;
-
-        @JsonProperty("pgrEntity")
-          @NotNull
-
-          @Valid
-                private ServiceWrapper pgrEntity = null;
+public class ServiceRequest {
+    @JsonProperty("requestInfo")
 
     @Valid
-    @NonNull
-    @JsonProperty("service")
-    private Service service = null;
+    private RequestInfo requestInfo = null;
+
+    @JsonProperty("pgrEntity")
+    @NotNull
 
     @Valid
-    @JsonProperty("workflow")
-    private Workflow workflow = null;
+    private ServiceWrapper pgrEntity = null;
+
 }

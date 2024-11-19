@@ -1,12 +1,15 @@
 package digit.web.models;
 
 import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import digit.web.models.Document;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -25,38 +28,40 @@ import lombok.Builder;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Workflow   {
-        @JsonProperty("action")
+public class Workflow {
+    @JsonProperty("action")
 
-        @Size(min=1,max=64)         private String action = null;
+    @Size(min = 1, max = 64)
+    private String action = null;
 
-        @JsonProperty("assignes")
+    @JsonProperty("assignes")
 
-                private List<String> assignes = null;
+    private List<String> assignes = null;
 
-        @JsonProperty("comments")
+    @JsonProperty("comments")
 
-        @Size(min=1,max=64)         private String comments = null;
+    @Size(min = 1, max = 64)
+    private String comments = null;
 
-        @JsonProperty("varificationDocuments")
-          @Valid
-                private List<Document> varificationDocuments = null;
+    @JsonProperty("varificationDocuments")
+    @Valid
+    private List<Document> varificationDocuments = null;
 
 
-        public Workflow addAssignesItem(String assignesItem) {
-            if (this.assignes == null) {
+    public Workflow addAssignesItem(String assignesItem) {
+        if (this.assignes == null) {
             this.assignes = new ArrayList<>();
-            }
+        }
         this.assignes.add(assignesItem);
         return this;
-        }
+    }
 
-        public Workflow addVarificationDocumentsItem(Document varificationDocumentsItem) {
-            if (this.varificationDocuments == null) {
+    public Workflow addVarificationDocumentsItem(Document varificationDocumentsItem) {
+        if (this.varificationDocuments == null) {
             this.varificationDocuments = new ArrayList<>();
-            }
+        }
         this.varificationDocuments.add(varificationDocumentsItem);
         return this;
-        }
+    }
 
 }

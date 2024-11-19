@@ -2,14 +2,15 @@ package digit.service;
 
 import org.egov.common.contract.request.RequestInfo;
 import digit.config.Configuration;
-//import digit.repository.IdGenRepository;
-//import digit.util.PGRUtils;
+import digit.repository.IdGenRepository;
+import digit.util.PGRUtils;
 import digit.web.models.*;
 //import digit.web.models.Idgen.IdResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+//import org.egov.common.contract.models.AuditDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,90 +23,83 @@ import static digit.util.PGRConstants.USERTYPE_CITIZEN;
 public class EnrichmentService {
 
 
-//    private PGRUtils utils;
+    private PGRUtils utils;
 
-//    private IdGenRepository idGenRepository;
+    private IdGenRepository idGenRepository;
 
     private Configuration config;
 
     private UserService userService;
 
     @Autowired
-//    public EnrichmentService(PGRUtils utils, IdGenRepository idGenRepository, Configuration config, UserService userService) {
-//        this.utils = utils;
-//        this.idGenRepository = idGenRepository;
-//        this.config = config;
-//        this.userService = userService;
-//    }
-
-    public EnrichmentService(Configuration config, UserService userService) {
+    public EnrichmentService(PGRUtils utils, IdGenRepository idGenRepository, Configuration config, UserService userService) {
+        this.utils = utils;
+        this.idGenRepository = idGenRepository;
         this.config = config;
         this.userService = userService;
     }
 
     /**
      * Enriches the create request with auditDetails. uuids and custom ids from idGen service
+     *
      * @param serviceRequest The create request
      */
-    public void enrichCreateRequest(ServiceRequest serviceRequest){
+    public void enrichCreateRequest(ServiceRequest serviceRequest) {
         RequestInfo requestInfo = serviceRequest.getRequestInfo();
-        Service service = serviceRequest.getService();
-        Workflow workflow = serviceRequest.getWorkflow();
+        Service service = serviceRequest.getPgrEntity().getService();
+        Workflow workflow = serviceRequest.getPgrEntity().getWorkflow();
         String tenantId = service.getTenantId();
         // Enrich accountId of the logged in citizen
-        if(requestInfo.getUserInfo().getType().equalsIgnoreCase(USERTYPE_CITIZEN))
-            serviceRequest.getService().setAccountId(requestInfo.getUserInfo().getUuid());
-        userService.callUserService(serviceRequest);
-//        AuditDetails auditDetails = utils.getAuditDetails(requestInfo.getUserInfo().getUuid(), service,true);
+        if (requestInfo.getUserInfo().getType().equalsIgnoreCase(USERTYPE_CITIZEN))
+            serviceRequest.getPgrEntity().getService().setAccountId(requestInfo.getUserInfo().getUuid());
+//        userService.callUserService(serviceRequest);
+//        AuditDetails auditDetails = utils.getAuditDetails(requestInfo.getUserInfo().getUuid(), service, true);
 //        service.setAuditDetails(auditDetails);
         service.setId(UUID.randomUUID().toString());
         service.getAddress().setId(UUID.randomUUID().toString());
         service.getAddress().setTenantId(tenantId);
         service.setActive(true);
-        if(workflow.getVarificationDocuments()!=null){
+        if (workflow.getVarificationDocuments() != null) {
             workflow.getVarificationDocuments().forEach(document -> {
                 document.setId(UUID.randomUUID().toString());
             });
         }
-        if(StringUtils.isEmpty(service.getAccountId()))
-            service.setAccountId(service.getCitizen().getUuid());
-//        List<String> customIds = getIdList(requestInfo,tenantId,config.getServiceRequestIdGenName(),config.getServiceRequestIdGenFormat(),1);
-//        service.setServiceRequestId(customIds.get(0));
+        if (StringUtils.isEmpty(service.getAccountId())) service.setAccountId(service.getCitizen().getUuid());
+        List<String> customIds = getIdList(requestInfo, tenantId, config.getServiceRequestIdGenName(), config.getServiceRequestIdGenFormat(), 1);
+        service.setServiceRequestId(customIds.get(0));
     }
 
 
     /**
      * Enriches the update request (updates the lastModifiedTime in auditDetails0
+     *
      * @param serviceRequest The update request
      */
-//    public void enrichUpdateRequest(ServiceRequest serviceRequest){
-//
-//        RequestInfo requestInfo = serviceRequest.getRequestInfo();
-//        Service service = serviceRequest.getService();
+    public void enrichUpdateRequest(ServiceRequest serviceRequest) {
+
+        RequestInfo requestInfo = serviceRequest.getRequestInfo();
+        Service service = serviceRequest.getPgrEntity().getService();
 //        AuditDetails auditDetails = utils.getAuditDetails(requestInfo.getUserInfo().getUuid(), service,false);
-//
 //        service.setAuditDetails(auditDetails);
-//
 //        userService.callUserService(serviceRequest);
-//    }
+    }
 
     /**
      * Enriches the search criteria in case of default search and enriches the userIds from mobileNumber in case of seach based on mobileNumber.
      * Also sets the default limit and offset if none is provided
+     *
      * @param requestInfo
      * @param criteria
      */
-//    public void enrichSearchRequest(RequestInfo requestInfo, RequestSearchCriteria criteria){
-//
-//        if(criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase(USERTYPE_CITIZEN)){
-//            String citizenMobileNumber = requestInfo.getUserInfo().getUserName();
-//            criteria.setMobileNumber(citizenMobileNumber);
-//        }
-//
-//        criteria.setAccountId(requestInfo.getUserInfo().getUuid());
-//
-//        String tenantId = (criteria.getTenantId()!=null) ? criteria.getTenantId() : requestInfo.getUserInfo().getTenantId();
-//
+    public void enrichSearchRequest(RequestInfo requestInfo, RequestSearchCriteria criteria) {
+
+        if (criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase(USERTYPE_CITIZEN)) {
+            String citizenMobileNumber = requestInfo.getUserInfo().getUserName();
+            criteria.setMobileNumber(citizenMobileNumber);
+        }
+
+        criteria.setAccountId(requestInfo.getUserInfo().getUuid());
+        String tenantId = (criteria.getTenantId() != null) ? criteria.getTenantId() : requestInfo.getUserInfo().getTenantId();
 //        if(criteria.getMobileNumber()!=null){
 //            userService.enrichUserIds(tenantId, criteria);
 //        }
@@ -118,8 +112,8 @@ public class EnrichmentService {
 //
 //        if(criteria.getLimit()!=null && criteria.getLimit() > config.getMaxLimit())
 //            criteria.setLimit(config.getMaxLimit());
-//
-//    }
+
+    }
 
 
     /**
@@ -132,16 +126,10 @@ public class EnrichmentService {
      * @param count       Number of ids to be generated
      * @return List of ids generated using idGen service
      */
-//    private List<String> getIdList(RequestInfo requestInfo, String tenantId, String idKey,
-//                                   String idformat, int count) {
-//        List<IdResponse> idResponses = idGenRepository.getId(requestInfo, tenantId, idKey, idformat, count).getIdResponses();
-//
-//        if (CollectionUtils.isEmpty(idResponses))
-//            throw new CustomException("IDGEN ERROR", "No ids returned from idgen Service");
-//
-//        return idResponses.stream()
-//                .map(IdResponse::getId).collect(Collectors.toList());
-//    }
-
-
+    private List<String> getIdList(RequestInfo requestInfo, String tenantId, String idKey, String idformat, int count) {
+        List<IdResponse> idResponses = idGenRepository.getId(requestInfo, tenantId, idKey, idformat, count).getIdResponses();
+        if (CollectionUtils.isEmpty(idResponses))
+            throw new CustomException("IDGEN ERROR", "No ids returned from idgen Service");
+        return idResponses.stream().map(IdResponse::getId).collect(Collectors.toList());
+    }
 }

@@ -21,14 +21,10 @@ import java.util.Map;
 @Repository
 public class PGRRowMapper implements ResultSetExtractor<List<Service>> {
 
-
     @Autowired
     private ObjectMapper mapper;
 
-
-
     public List<Service> extractData(ResultSet rs) throws SQLException, DataAccessException {
-
         Map<String, Service> serviceMap = new LinkedHashMap<>();
 
         while (rs.next()) {
@@ -38,7 +34,7 @@ public class PGRRowMapper implements ResultSetExtractor<List<Service>> {
             String tenantId = rs.getString("ser_tenantId");
             Boolean active = rs.getBoolean("active");
 
-            if(currentService == null){
+            if (currentService == null) {
 
                 id = rs.getString("ser_id");
                 String serviceCode = rs.getString("serviceCode");
@@ -52,29 +48,30 @@ public class PGRRowMapper implements ResultSetExtractor<List<Service>> {
                 String lastmodifiedby = rs.getString("ser_lastmodifiedby");
                 Long lastmodifiedtime = rs.getLong("ser_lastmodifiedtime");
                 Integer rating = rs.getInt("rating");
-                if(rs.wasNull()){rating = null;}
+                if (rs.wasNull()) {
+                    rating = null;
+                }
 
                 AuditDetails auditDetails = AuditDetails.builder().createdBy(createdby).createdTime(createdtime)
                         .lastModifiedBy(lastmodifiedby).lastModifiedTime(lastmodifiedtime).build();
 
-//                currentService = Service.builder().id(id).active(active)
-//                        .serviceCode(serviceCode)
-//                        .serviceRequestId(serviceRequestId)
-//                        .description(description)
-//                        .accountId(accountId)
-//                        .applicationStatus(applicationStatus)
-//                        .source(source)
-//                        .tenantId(tenantId)
-//                        .rating(rating)
-//                        .auditDetails(auditDetails)
-//                        .build();
+                currentService = Service.builder().id(id).active(active)
+                        .serviceCode(serviceCode)
+                        .serviceRequestId(serviceRequestId)
+                        .description(description)
+                        .accountId(accountId)
+                        .applicationStatus(applicationStatus)
+                        .source(source)
+                        .tenantId(tenantId)
+                        .auditDetails(auditDetails)
+                        .build();
 
-                JsonNode additionalDetails = getAdditionalDetail("ser_additionaldetails",rs);
+                JsonNode additionalDetails = getAdditionalDetail("ser_additionaldetails", rs);
 
-                if(additionalDetails != null)
+                if (additionalDetails != null)
                     currentService.setAdditionalDetail(additionalDetails);
 
-                serviceMap.put(currentService.getId(),currentService);
+                serviceMap.put(currentService.getId(), currentService);
 
             }
             addChildrenToProperty(rs, currentService);
@@ -87,15 +84,11 @@ public class PGRRowMapper implements ResultSetExtractor<List<Service>> {
     }
 
     private void addChildrenToProperty(ResultSet rs, Service service) throws SQLException {
-
-        if(service.getAddress() == null){
-
-            Double latitude =  rs.getDouble("latitude");
+        if (service.getAddress() == null) {
+            Double latitude = rs.getDouble("latitude");
             Double longitude = rs.getDouble("longitude");
             Boundary locality = Boundary.builder().code(rs.getString("locality")).build();
-
             GeoLocation geoLocation = GeoLocation.builder().latitude(latitude).longitude(longitude).build();
-
             Address address = Address.builder()
                     .tenantId(rs.getString("ads_tenantId"))
                     .id(rs.getString("ads_id"))
@@ -113,34 +106,25 @@ public class PGRRowMapper implements ResultSetExtractor<List<Service>> {
                     .pincode(rs.getString("pincode"))
                     .geoLocation(geoLocation)
                     .build();
-
-            JsonNode additionalDetails = getAdditionalDetail("ads_additionaldetails",rs);
-
+            JsonNode additionalDetails = getAdditionalDetail("ads_additionaldetails", rs);
 //            if(additionalDetails != null)
 //                address.setAdditionDetails(additionalDetails);
-
             service.setAddress(address);
-
         }
-
     }
 
 
-    private JsonNode getAdditionalDetail(String columnName, ResultSet rs){
-
+    private JsonNode getAdditionalDetail(String columnName, ResultSet rs) {
         JsonNode additionalDetail = null;
         try {
             PGobject pgObj = (PGobject) rs.getObject(columnName);
-            if(pgObj!=null){
+            if (pgObj != null) {
                 additionalDetail = mapper.readTree(pgObj.getValue());
             }
-        }
-        catch (IOException | SQLException e){
-            throw new CustomException("PARSING_ERROR","Failed to parse additionalDetail object");
+        } catch (IOException | SQLException e) {
+            throw new CustomException("PARSING_ERROR", "Failed to parse additionalDetail object");
         }
         return additionalDetail;
     }
-
-
 }
 
