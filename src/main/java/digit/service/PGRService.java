@@ -98,15 +98,6 @@ public class PGRService {
                 sortedWrappers.put(svc.getService().getAuditDetails().getCreatedTime(), serviceWrapperList);
             }
         }
-        for (ServiceWrapper svc : serviceWrappers) {
-            if (sortedWrappers.containsKey(svc.getService().getAuditDetails().getCreatedTime())) {
-                sortedWrappers.get(svc.getService().getAuditDetails().getCreatedTime()).add(svc);
-            } else {
-                List<ServiceWrapper> serviceWrapperList = new ArrayList<>();
-                serviceWrapperList.add(svc);
-                sortedWrappers.put(svc.getService().getAuditDetails().getCreatedTime(), serviceWrapperList);
-            }
-        }
         List<ServiceWrapper> sortedServiceWrappers = new ArrayList<>();
         for (Long createdTimeDesc : sortedWrappers.keySet()) {
             sortedServiceWrappers.addAll(sortedWrappers.get(createdTimeDesc));
